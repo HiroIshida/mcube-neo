@@ -1,5 +1,6 @@
 #include <vector>
 #include <array>
+#include <tuple>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "marchingcubes.h"
@@ -10,7 +11,9 @@
 namespace py = pybind11;
 using namespace std;
 using namespace Eigen;
-void marching_cubes(const py::EigenDRef<VectorXd> arr_flatten, const array<int, 3>& shape, double isovalue)
+
+tuple<vector<double>, vector<size_t>>
+marching_cubes(const py::EigenDRef<VectorXd> arr_flatten, const array<int, 3>& shape, double isovalue)
 {
     // here we use EigenDRef as it does not make a copy caues it's just a refernce 
     // pybind11 seems not support pass by reference for std::vector
@@ -28,6 +31,7 @@ void marching_cubes(const py::EigenDRef<VectorXd> arr_flatten, const array<int, 
     vector<double> vertices;
     vector<size_t> polygons;
     mc::marching_cubes(lower, upper, numx, numy, numz, access_3d_arr, isovalue, vertices, polygons);
+    return std::make_tuple(vertices, polygons);
 }
 
 
