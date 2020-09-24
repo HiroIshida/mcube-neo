@@ -19,6 +19,13 @@ shape = [N]*3
 isovalue = 0.0
 from time import time
 ts = time()
-for i in range(100):
-    mcube.marching_cube(F, shape, isovalue)
+for i in range(10):
+    V_, P_ = mcube.marching_cube(F, shape, isovalue)
+    V = np.array(V_).reshape(len(V_)//3, 3)
+    P = np.array(P_).reshape(len(P_)//3, 3)
 print(time() - ts)
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(V[:, 0], V[:, 1], V[:, 2])
+plt.show()
