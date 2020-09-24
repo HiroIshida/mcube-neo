@@ -4,10 +4,16 @@
 #include <pybind11/stl.h>
 #include "marchingcubes.h"
 
+#include <pybind11/eigen.h>
+#include <Eigen/Dense>
+
 namespace py = pybind11;
 using namespace std;
-void marching_cubes(const vector<double>& arr_flatten, const array<int, 3>& shape, double isovalue)
+using namespace Eigen;
+void marching_cubes(const py::EigenDRef<VectorXd> arr_flatten, const array<int, 3>& shape, double isovalue)
 {
+    // here we use EigenDRef as it does not make a copy caues it's just a refernce 
+    // pybind11 seems not support pass by reference for std::vector
     array<int, 3> lower{0, 0, 0};
     array<int, 3> upper{shape[0]-1, shape[1]-1, shape[2]-1};
     int numx = upper[0] - lower[0] + 1;
@@ -16,7 +22,7 @@ void marching_cubes(const vector<double>& arr_flatten, const array<int, 3>& shap
 
     auto access_3d_arr = [&](int i, int j, int k){
         auto idx = i * shape[1] * shape[2] + j * shape[2] + k;
-        return arr_flatten[idx];
+        return arr_flatten(idx);
     };
 
     vector<double> vertices;
