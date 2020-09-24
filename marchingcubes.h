@@ -25,7 +25,7 @@ size_t mc_add_vertex(double x1, double y1, double z1, double c2,
 template<typename vector3, typename formula>
 void marching_cubes(const vector3& lower, const vector3& upper,
     int numx, int numy, int numz, formula f, double isovalue,
-    std::vector<double>& vertices, std::vector<typename vector3::size_type>& polygons)
+    std::vector<double>& vertices, std::vector<int>& polygons)
 {
     using coord_type = typename vector3::value_type;
     using size_type = typename vector3::size_type;

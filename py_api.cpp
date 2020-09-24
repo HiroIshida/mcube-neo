@@ -12,7 +12,7 @@ namespace py = pybind11;
 using namespace std;
 using namespace Eigen;
 
-tuple<vector<double>, vector<size_t>>
+tuple<VectorXd, VectorXi>
 marching_cubes(const py::EigenDRef<VectorXd> arr_flatten, const array<int, 3>& shape, double isovalue)
 {
     // here we use EigenDRef as it does not make a copy caues it's just a refernce 
@@ -29,9 +29,12 @@ marching_cubes(const py::EigenDRef<VectorXd> arr_flatten, const array<int, 3>& s
     };
 
     vector<double> vertices;
-    vector<size_t> polygons;
+    vector<int> polygons;
+
     mc::marching_cubes(lower, upper, numx, numy, numz, access_3d_arr, isovalue, vertices, polygons);
-    return std::make_tuple(vertices, polygons);
+    VectorXd V = Map<VectorXd>(&vertices[0], vertices.size());
+    VectorXi P = Map<VectorXi>(&polygons[0], polygons.size());
+    return std::make_tuple(V, P);
 }
 
 
