@@ -7,7 +7,7 @@ void marching_cube()
 {
 }
 
-PYBIND11_MODULE(example, m) {
+PYBIND11_MODULE(mcube, m) {
     m.doc() = "python wrapper"; 
     m.def("marching_cube", &marching_cube, "marching cube method");
 }
