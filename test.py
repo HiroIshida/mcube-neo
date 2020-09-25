@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d import Axes3D
 import build.mcube as mcube
 
-N = 12
+N = 50
 w = 1.2
 x = y = z = np.linspace(-w, w, N) 
 X, Y, Z = np.meshgrid(x, y, z)
@@ -18,10 +18,23 @@ shape = [N]*3
 isovalue = 0.0
 from time import time
 ts = time()
-for i in range(1):
-    V, E, NF = mcube.marching_cube(F, shape, isovalue)
+for i in range(100):
+    V, E, groups = mcube.marching_cube(F, shape, isovalue)
 print(time() - ts)
 
+assert sum(map(len, groups)) == len(V), str(len(V)) + " and " + str(sum(map(len, groups)))
+
+import matplotlib.cm as cm
+cmap = cm.get_cmap(name='rainbow')
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+colors = [cmap(40*i) for i in range(len(groups))]
+for group, color in zip(groups, colors):
+    ax.scatter(V[group, 0], V[group, 1], V[group, 2], c=color)
+plt.show()
+
+"""
 def dfs(E, N):
     isVisited = np.array([False]*len(V))
 
@@ -96,3 +109,4 @@ colors = [cmap(40*i) for i in range(len(group_list))]
 for group, color in zip(group_list, colors):
     ax.scatter(V[group, 0], V[group, 1], V[group, 2], c=color)
 plt.show()
+"""

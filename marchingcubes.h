@@ -8,6 +8,8 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <iostream>
+#include <stack>
+#include <algorithm>    
 
 namespace mc
 {
@@ -61,6 +63,54 @@ struct TableManager
                 neighbor.push_back(vec_new);
                 vert_idx++;
             }
+        }
+
+        std::vector<std::vector<uint>> connected_components(int n_vert, vector<int> polygons){
+            std::vector<bool> isVisited(n_vert, false);
+
+            auto make_group = [&](int idx_init){
+                std::vector<uint> group;
+                group.reserve(n_vert); // we know group will have n_vert elems at most
+                std::stack<uint> Q;
+
+                // initialize
+                isVisited[idx_init] = true;
+                group.push_back(idx_init);
+                Q.push(idx_init);
+
+                while(!Q.empty()){
+                    auto idx_here = Q.top();
+                    Q.pop();
+                    for(int i=0; i<neighbor_num_table[idx_here]; i++){
+                        auto face_idx = neighbor_table[idx_here][i];
+                        for(int j=0; j<3; j++){
+                            uint idx_next = polygons[face_idx * 3 + j];
+                            if(!isVisited[idx_next]){
+                                isVisited[idx_next] = true;
+                                group.push_back(idx_next);
+                                Q.push(idx_next);
+                            }
+                        }
+                    }
+                }
+                return group;
+            };
+
+            auto first_false_idx = [&]() -> int{// return -1 if not found
+                for(int idx=0; idx<n_vert; idx++){
+                    if(!isVisited[idx])
+                        return idx;
+                }
+                return -1;
+            };
+
+            std::vector<std::vector<uint>> groups;
+            while(true){
+                auto idx_start = first_false_idx();
+                if(idx_start == -1){return groups;}
+                groups.push_back(make_group(idx_start));
+            }
+
         }
 };
 
@@ -266,10 +316,11 @@ tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const ve
             }
         }
     }
-    tm.copy_elements(neighbor_faces);
+    auto groups = tm.connected_components(vertices.size()/3, polygons);
     MatrixXd V = Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(vertices.data(), vertices.size()/3, 3);
     MatrixXi P = Map<Matrix<int, Dynamic, Dynamic, RowMajor>>(polygons.data(), polygons.size()/3, 3);
-    return std::make_tuple(V, P, neighbor_faces);
+
+    return std::make_tuple(V, P, groups);
 }
 
 }
