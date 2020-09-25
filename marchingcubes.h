@@ -65,12 +65,13 @@ struct TableManager
             }
         }
 
-        std::vector<std::vector<uint>> connected_components(int n_vert, vector<int> polygons){
-            std::vector<bool> isVisited(n_vert, false);
+        std::vector<std::vector<uint>> connected_components(vector<int> polygons){
+            int n_facet = polygons.size() / 3;
+            std::vector<bool> isVisited(n_facet, false);
 
             auto make_group = [&](int idx_init){
                 std::vector<uint> group;
-                group.reserve(n_vert); // we know group will have n_vert elems at most
+                group.reserve(n_facet); // we know group will have n_vert elems at most
                 std::stack<uint> Q;
 
                 // initialize
@@ -81,14 +82,14 @@ struct TableManager
                 while(!Q.empty()){
                     auto idx_here = Q.top();
                     Q.pop();
-                    for(int i=0; i<neighbor_num_table[idx_here]; i++){
-                        auto face_idx = neighbor_table[idx_here][i];
-                        for(int j=0; j<3; j++){
-                            uint idx_next = polygons[face_idx * 3 + j];
-                            if(!isVisited[idx_next]){
-                                isVisited[idx_next] = true;
-                                group.push_back(idx_next);
-                                Q.push(idx_next);
+                    for(int i=0; i<3; i++){
+                        uint vert_idx = polygons[3 * idx_here + i];
+                        for(int j=0; j< neighbor_num_table[vert_idx]; j++){
+                            uint near_facet_idx = neighbor_table[vert_idx][j];
+                            if(!isVisited[near_facet_idx]){
+                                isVisited[near_facet_idx] = true;
+                                group.push_back(near_facet_idx);
+                                Q.push(near_facet_idx);
                             }
                         }
                     }
@@ -97,7 +98,7 @@ struct TableManager
             };
 
             auto first_false_idx = [&]() -> int{// return -1 if not found
-                for(int idx=0; idx<n_vert; idx++){
+                for(int idx=0; idx<n_facet; idx++){
                     if(!isVisited[idx])
                         return idx;
                 }
@@ -316,9 +317,10 @@ tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const ve
             }
         }
     }
-    auto groups = tm.connected_components(vertices.size()/3, polygons);
+    auto groups = tm.connected_components(polygons);
     MatrixXd V = Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(vertices.data(), vertices.size()/3, 3);
     MatrixXi P = Map<Matrix<int, Dynamic, Dynamic, RowMajor>>(polygons.data(), polygons.size()/3, 3);
+
 
     return std::make_tuple(V, P, groups);
 }
