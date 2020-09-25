@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d import Axes3D
 import build.mcube as mcube
 
-N = 30
+N = 15
 w = 1.2
 x = y = z = np.linspace(-w, w, N) 
 X, Y, Z = np.meshgrid(x, y, z)
@@ -24,24 +24,44 @@ print(time() - ts)
 
 def dfs(E, N):
     isVisited = np.array([False]*len(V))
-    idx_init = 0
 
-    def recursion(idx_here, isVisited):
+    def recursion(idx_here, isVisited, group):
         isVisited[idx_here] = True
+        group.append(idx_here)
+
         faces_near = N[idx_here]
         for idx_face in faces_near:
             face = E[idx_face]
             for idx_vert in face:
                 if not isVisited[idx_vert]:
-                    recursion(idx_vert, isVisited)
+                    print("hoge")
+                    recursion(idx_vert, isVisited, group)
 
-    recursion(idx_init, isVisited)
-    return isVisited
+    def make_group(idx_init):
+        group = []
+        recursion(idx_init, isVisited, group)
+        return group
 
-isVisited = dfs(E, NF)
+    group_list = []
+    while(True):
+        print("hoge")
+        pair = next(((x, idx) for (x, idx) in \
+                zip(list(isVisited), range(len(isVisited))) if ~x), None)
+        if pair is None:
+            break
+        group_list.append(make_group(pair[1]))
+
+    return isVisited, group_list
+
+ts = time()
+isVisited, group_list = dfs(E, NF)
+print(time() - ts)
+import matplotlib.cm as cm
+cmap = cm.get_cmap(name='rainbow')
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.scatter(V[isVisited, 0], V[isVisited, 1], V[isVisited, 2], c="red")
-ax.scatter(V[~isVisited, 0], V[~isVisited, 1], V[~isVisited, 2], c="blue")
+colors = [cmap(40*i) for i in range(len(group_list))]
+for group, color in zip(group_list, colors):
+    ax.scatter(V[group, 0], V[group, 1], V[group, 2], c=color)
 plt.show()
