@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d import Axes3D
 import build.mcube as mcube
 
-N = 50
+N = 12
 w = 1.2
 x = y = z = np.linspace(-w, w, N) 
 X, Y, Z = np.meshgrid(x, y, z)
@@ -59,6 +59,7 @@ def dfs_queue(E, N):
         group = []
         q = LifoQueue()
         isVisited[idx_init] = True
+        group.append(idx_init)
         q.put(idx_init)
         while not q.empty():
             idx_here = q.get()
@@ -83,9 +84,11 @@ def dfs_queue(E, N):
     return isVisited, group_list
 
 isVisited, group_list = dfs_queue(E, NF)
+assert sum(map(len, group_list)) == len(V), str(len(V)) + " and " + str(sum(map(len, group_list)))
 
 import matplotlib.cm as cm
 cmap = cm.get_cmap(name='rainbow')
+
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
