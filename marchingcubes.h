@@ -5,12 +5,16 @@
 
 #include <stddef.h>
 #include <array>
+#include <Eigen/Dense>
 #include <vector>
 #include <iostream>
 
 namespace mc
 {
 
+
+using namespace Eigen;
+using namespace std;
 extern int edge_table[256];
 extern int triangle_table[256][16];
 
@@ -62,16 +66,15 @@ struct TableManager
 
 
 template<typename vector3, typename formula>
-void marching_cubes(const vector3& lower, const vector3& upper,
-    int numx, int numy, int numz, formula f, double isovalue,
-    std::vector<double>& vertices, std::vector<int>& polygons,
-    std::vector<std::vector<uint>>& neighbor_faces
+tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, int numz, formula f, double isovalue
     )
 {
+
     using coord_type = typename vector3::value_type;
     using size_type = typename vector3::size_type;
     using namespace private_;
 
+    /*
     // Some initial checks
     if(numx < 2 || numy < 2 || numz < 2)
         return;
@@ -79,6 +82,7 @@ void marching_cubes(const vector3& lower, const vector3& upper,
     if(!std::equal(std::begin(lower), std::end(lower), std::begin(upper),
                    [](double a, double b)->bool {return a <= b;}))
         return;
+        */
 
     TableManager tm(numx, numy, numz);
 
@@ -94,6 +98,10 @@ void marching_cubes(const vector3& lower, const vector3& upper,
     std::vector<size_type> shared_indices_y(num_shared_indices);
     std::vector<size_type> shared_indices_z(num_shared_indices);
     auto _offset = [&](size_t i, size_t j, size_t k){return i*(numy+1)*(numz+1) + j*(numz+1) + k;};
+
+    vector<double> vertices;
+    vector<int> polygons;
+    vector<vector<unsigned int>> neighbor_faces;
 
     for(int i=0; i<numx; ++i)
     {
@@ -259,6 +267,9 @@ void marching_cubes(const vector3& lower, const vector3& upper,
         }
     }
     tm.copy_elements(neighbor_faces);
+    MatrixXd V = Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(vertices.data(), vertices.size()/3, 3);
+    MatrixXi P = Map<Matrix<int, Dynamic, Dynamic, RowMajor>>(polygons.data(), polygons.size()/3, 3);
+    return std::make_tuple(V, P, neighbor_faces);
 }
 
 }

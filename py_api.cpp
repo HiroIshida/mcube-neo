@@ -28,14 +28,7 @@ marching_cubes(const py::EigenDRef<VectorXd> arr_flatten, const array<int, 3>& s
         return arr_flatten(idx);
     };
 
-    vector<double> vertices;
-    vector<int> polygons;
-    vector<vector<unsigned int>> neighbor_faces;
-
-    mc::marching_cubes(lower, upper, numx, numy, numz, access_3d_arr, isovalue, vertices, polygons, neighbor_faces);
-    MatrixXd V = Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(vertices.data(), vertices.size()/3, 3);
-    MatrixXi P = Map<Matrix<int, Dynamic, Dynamic, RowMajor>>(polygons.data(), polygons.size()/3, 3);
-    return std::make_tuple(V, P, neighbor_faces);
+    return mc::marching_cubes(lower, upper, numx, numy, numz, access_3d_arr, isovalue);
 }
 
 
