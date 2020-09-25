@@ -1,4 +1,11 @@
-// Copyright (c) 2012-2015, P. M. Neila
+/*
+ HiroIshida modified orignal source code in https://github.com/pmneila/PyMCubes by P. M. Neila.
+(The oriinal code is distributed with BSD 3-clause license)
+
+Copyright (c) 2012-2015, P. M. Neila
+*/
+  
+
 
 #ifndef _MARCHING_CUBES_H
 #define _MARCHING_CUBES_H
@@ -125,7 +132,7 @@ tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const ve
     using size_type = typename vector3::size_type;
     using namespace private_;
 
-    /*
+    /* TODO raise exception
     // Some initial checks
     if(numx < 2 || numy < 2 || numz < 2)
         return;
