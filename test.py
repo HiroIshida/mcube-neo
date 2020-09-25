@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d import Axes3D
 import build.mcube as mcube
 
-N = 50
+N = 30
 w = 1.2
 x = y = z = np.linspace(-w, w, N) 
 X, Y, Z = np.meshgrid(x, y, z)
@@ -19,10 +19,29 @@ isovalue = 0.0
 from time import time
 ts = time()
 for i in range(1):
-    V, P, NF = mcube.marching_cube(F, shape, isovalue)
+    V, E, NF = mcube.marching_cube(F, shape, isovalue)
 print(time() - ts)
+
+def dfs(E, N):
+    isVisited = np.array([False]*len(V))
+    idx_init = 0
+
+    def recursion(idx_here, isVisited):
+        isVisited[idx_here] = True
+        faces_near = N[idx_here]
+        for idx_face in faces_near:
+            face = E[idx_face]
+            for idx_vert in face:
+                if not isVisited[idx_vert]:
+                    recursion(idx_vert, isVisited)
+
+    recursion(idx_init, isVisited)
+    return isVisited
+
+isVisited = dfs(E, NF)
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-ax.scatter(V[:, 0], V[:, 1], V[:, 2])
+ax.scatter(V[isVisited, 0], V[isVisited, 1], V[isVisited, 2], c="red")
+ax.scatter(V[~isVisited, 0], V[~isVisited, 1], V[~isVisited, 2], c="blue")
 plt.show()
