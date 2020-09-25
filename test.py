@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d import Axes3D
-from skimage import measure
 import build.mcube as mcube
 
 N = 50
@@ -19,8 +18,8 @@ shape = [N]*3
 isovalue = 0.0
 from time import time
 ts = time()
-for i in range(100):
-    V, P = mcube.marching_cube(F, shape, isovalue)
+for i in range(1):
+    V, P, NF = mcube.marching_cube(F, shape, isovalue)
 print(time() - ts)
 
 fig = plt.figure()

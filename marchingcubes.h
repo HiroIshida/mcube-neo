@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <array>
 #include <vector>
+#include <iostream>
 
 namespace mc
 {
@@ -22,10 +23,50 @@ size_t mc_add_vertex(double x1, double y1, double z1, double c2,
     int axis, double f1, double f2, double isovalue, std::vector<double>* vertices);
 }
 
+struct TableManager
+{
+    public:
+        std::vector<std::vector<uint>> neighbor_table;
+        std::vector<uint> neighbor_num_table;
+        TableManager(int n1, int n2, int n3){
+            int n_vert_max = n1*n2*n3;
+            int n_neighbor_max = 8; // due to marching cube's property (don't proved yet, but emperically)
+
+            std::vector<uint> neighbor_lst(n_neighbor_max, 0);
+            neighbor_table = std::vector<std::vector<uint>>(n_vert_max, neighbor_lst);
+            neighbor_num_table = std::vector<uint>(n_vert_max, 0);
+        }
+
+        void add_element(uint vert_idx, uint elem){
+            int idx = neighbor_num_table[vert_idx];
+            neighbor_table[vert_idx][idx] = elem;
+            neighbor_num_table[vert_idx]++;
+        }
+
+        // just for debugging in python side
+        void copy_elements(std::vector<std::vector<uint>>& neighbor){
+            int vert_idx = 0;
+            while(true){
+                int neighbor_num = neighbor_num_table[vert_idx];
+                if(neighbor_num == 0){
+                    break;
+                }
+                auto start = neighbor_table[vert_idx].begin();
+                auto last = start + neighbor_num;
+                std::vector<uint> vec_new(start, last); 
+                neighbor.push_back(vec_new);
+                vert_idx++;
+            }
+        }
+};
+
+
 template<typename vector3, typename formula>
 void marching_cubes(const vector3& lower, const vector3& upper,
     int numx, int numy, int numz, formula f, double isovalue,
-    std::vector<double>& vertices, std::vector<int>& polygons)
+    std::vector<double>& vertices, std::vector<int>& polygons,
+    std::vector<std::vector<uint>>& neighbor_faces
+    )
 {
     using coord_type = typename vector3::value_type;
     using size_type = typename vector3::size_type;
@@ -38,6 +79,8 @@ void marching_cubes(const vector3& lower, const vector3& upper,
     if(!std::equal(std::begin(lower), std::end(lower), std::begin(upper),
                    [](double a, double b)->bool {return a <= b;}))
         return;
+
+    TableManager tm(numx, numy, numz);
 
     // numx, numy and numz are the numbers of evaluations in each direction
     --numx; --numy; --numz;
@@ -205,12 +248,17 @@ void marching_cubes(const vector3& lower, const vector3& upper,
 
                 int tri;
                 int* triangle_table_ptr = triangle_table[cubeindex];
-                for(int m=0; tri = triangle_table_ptr[m], tri != -1; ++m)
-                    polygons.push_back(indices[tri]);
+                for(int m=0; tri = triangle_table_ptr[m], tri != -1; ++m){
+                    int idx_vertex = indices[tri];
+                    polygons.push_back(idx_vertex);
+
+                    int idx_polygon = (polygons.size() - 1)/ 3;
+                    tm.add_element(idx_vertex, idx_polygon);
+                }
             }
         }
     }
-
+    tm.copy_elements(neighbor_faces);
 }
 
 }
