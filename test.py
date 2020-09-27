@@ -4,7 +4,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from mpl_toolkits.mplot3d import Axes3D
 import mcube as mcube
 
-N = 50
+N = 30
 w = 1.2
 x = y = z = np.linspace(-w, w, N) 
 X, Y, Z = np.meshgrid(x, y, z)
