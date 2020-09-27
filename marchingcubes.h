@@ -15,8 +15,7 @@ Copyright (c) 2012-2015, P. M. Neila
 #include <Eigen/Dense>
 #include <vector>
 #include <iostream>
-#include <stack>
-#include <algorithm>    
+#include "tablemanager.h"
 
 namespace mc
 {
@@ -36,95 +35,8 @@ size_t mc_add_vertex(double x1, double y1, double z1, double c2,
     int axis, double f1, double f2, double isovalue, std::vector<double>* vertices);
 }
 
-struct TableManager
-{
-    public:
-        std::vector<std::vector<uint>> neighbor_table;
-        std::vector<uint> neighbor_num_table;
-        TableManager(int n1, int n2, int n3){
-            int n_vert_max = n1*n2*n3;
-            int n_neighbor_max = 8; // due to marching cube's property (don't proved yet, but emperically)
-
-            std::vector<uint> neighbor_lst(n_neighbor_max, 0);
-            neighbor_table = std::vector<std::vector<uint>>(n_vert_max, neighbor_lst);
-            neighbor_num_table = std::vector<uint>(n_vert_max, 0);
-        }
-
-        void add_element(uint vert_idx, uint elem){
-            int idx = neighbor_num_table[vert_idx];
-            neighbor_table[vert_idx][idx] = elem;
-            neighbor_num_table[vert_idx]++;
-        }
-
-        // just for debugging in python side
-        void copy_elements(std::vector<std::vector<uint>>& neighbor){
-            int vert_idx = 0;
-            while(true){
-                int neighbor_num = neighbor_num_table[vert_idx];
-                if(neighbor_num == 0){
-                    break;
-                }
-                auto start = neighbor_table[vert_idx].begin();
-                auto last = start + neighbor_num;
-                std::vector<uint> vec_new(start, last); 
-                neighbor.push_back(vec_new);
-                vert_idx++;
-            }
-        }
-
-        std::vector<std::vector<uint>> connected_components(vector<int> polygons){
-            int n_facet = polygons.size() / 3;
-            std::vector<bool> isVisited(n_facet, false);
-
-            auto make_group = [&](int idx_init){
-                std::vector<uint> group;
-                group.reserve(n_facet); // we know group will have n_vert elems at most
-                std::stack<uint> Q;
-
-                // initialize
-                isVisited[idx_init] = true;
-                group.push_back(idx_init);
-                Q.push(idx_init);
-
-                while(!Q.empty()){
-                    auto idx_here = Q.top();
-                    Q.pop();
-                    for(int i=0; i<3; i++){
-                        uint vert_idx = polygons[3 * idx_here + i];
-                        for(int j=0; j< neighbor_num_table[vert_idx]; j++){
-                            uint near_facet_idx = neighbor_table[vert_idx][j];
-                            if(!isVisited[near_facet_idx]){
-                                isVisited[near_facet_idx] = true;
-                                group.push_back(near_facet_idx);
-                                Q.push(near_facet_idx);
-                            }
-                        }
-                    }
-                }
-                return group;
-            };
-
-            auto first_false_idx = [&]() -> int{// return -1 if not found
-                for(int idx=0; idx<n_facet; idx++){
-                    if(!isVisited[idx])
-                        return idx;
-                }
-                return -1;
-            };
-
-            std::vector<std::vector<uint>> groups;
-            while(true){
-                auto idx_start = first_false_idx();
-                if(idx_start == -1){return groups;}
-                groups.push_back(make_group(idx_start));
-            }
-
-        }
-};
-
-
 template<typename vector3, typename formula>
-tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, int numz, formula f, double isovalue
+tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, int numz, formula f, double isovalue, TableManager& tm
     )
 {
 
@@ -142,7 +54,6 @@ tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const ve
         return;
         */
 
-    TableManager tm(numx, numy, numz);
 
     // numx, numy and numz are the numbers of evaluations in each direction
     --numx; --numy; --numz;
