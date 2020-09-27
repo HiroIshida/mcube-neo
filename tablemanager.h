@@ -22,6 +22,13 @@ struct TableManager
             neighbor_num_table[vert_idx]++;
         }
 
+        void reset(){
+            // note, we don't have to reset neighbor_table. As the neighbor_table is the huge chunk
+            // resetting all of them taking a huge cost. That's why I let the class have neighbor_num_table
+            // to manage the date, which enables neighbor_table to keep nasty
+            std::fill(neighbor_num_table.begin(), neighbor_num_table.end(), 0);
+        }
+
         // just for debugging in python side
         void copy_elements(std::vector<std::vector<uint>>& neighbor){
             int vert_idx = 0;
