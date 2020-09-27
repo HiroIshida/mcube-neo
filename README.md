@@ -10,6 +10,7 @@ git clone https://github.com/pybind/pybind11
 mkdir build
 cd build
 cmake .. -DPYTHON_EXECUTABLE=$(which python)
+# cmake .. -DPYTHON_EXECUTABLE=$(which python) -PYTHON_GLOBAL_SITE_PKG=ON # if want to install to global site package
 make
 make install
 ```
