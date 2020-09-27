@@ -9,7 +9,7 @@ cd mcube-neo
 git clone https://github.com/pybind/pybind11
 mkdir build
 cd build
-cmake ..
+cmake .. -DPYTHON_EXECUTABLE=$(which python)
 make
 make install
 ```
