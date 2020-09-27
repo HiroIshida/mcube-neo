@@ -16,11 +16,7 @@ def func(X):
 Z = func(pts)
 shape = [N]*3
 isovalue = 0.0
-from time import time
-ts = time()
-for i in range(100):
-    V, F, groups = mcube.marching_cube(Z, shape, isovalue)
-print(time() - ts)
+V, F, groups = mcube.marching_cube(Z, shape, isovalue)
 
 assert sum(map(len, groups)) == len(F), str(len(F)) + " and " + str(sum(map(len, groups)))
 
@@ -29,10 +25,11 @@ cmap = cm.get_cmap(name='rainbow')
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-colors = [cmap(40*i) for i in range(len(groups))]
+colors = [cmap(25*i) for i in range(len(groups))]
 for group, color in zip(groups, colors):
     idx_verts = list(set(F[group].flatten()))
     ax.scatter(V[idx_verts, 0], V[idx_verts, 1], V[idx_verts, 2], c=color)
+plt.tight_layout()
 plt.show()
 
 """
