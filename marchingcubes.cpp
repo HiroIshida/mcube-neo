@@ -298,7 +298,7 @@ double mc_isovalue_interpolation(double isovalue, double f1, double f2,
 }
 
 size_t mc_add_vertex(double x1, double y1, double z1, double c2,
-    int axis, double f1, double f2, double isovalue, std::vector<double>* vertices)
+    int axis, double f1, double f2, double isovalue, ReservedVector<double>* vertices)
 {
     size_t vertex_index = vertices->size() / 3;
     if(axis == 0)

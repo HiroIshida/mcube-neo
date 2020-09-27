@@ -32,11 +32,14 @@ namespace private_
 double mc_isovalue_interpolation(double isovalue, double f1, double f2,
     double x1, double x2);
 size_t mc_add_vertex(double x1, double y1, double z1, double c2,
-    int axis, double f1, double f2, double isovalue, std::vector<double>* vertices);
+    int axis, double f1, double f2, double isovalue, ReservedVector<double>* vertices);
 }
 
 template<typename vector3, typename formula>
-tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, int numz, formula f, double isovalue, TableManager& tm
+tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, int numz, formula f, double isovalue, 
+        TableManager& tm,
+        ReservedVector<double>& vertices,
+        ReservedVector<int>& polygons
     )
 {
 
@@ -68,8 +71,8 @@ tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const ve
     std::vector<size_type> shared_indices_z(num_shared_indices);
     auto _offset = [&](size_t i, size_t j, size_t k){return i*(numy+1)*(numz+1) + j*(numz+1) + k;};
 
-    vector<double> vertices;
-    ReservedVector<int> polygons(tm.n_facet_max);
+    /*
+    */
 
     for(int i=0; i<numx; ++i)
     {

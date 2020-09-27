@@ -30,7 +30,11 @@ marching_cubes(const py::EigenDRef<VectorXd> arr_flatten, const array<int, 3>& s
 
     auto tm = TableManager(numx, numy, numz);
     tm.reset();
-    return mc::marching_cubes(lower, upper, numx, numy, numz, access_3d_arr, isovalue, tm);
+
+    ReservedVector<double> vertices(tm.n_vert_max);
+    ReservedVector<int> polygons(tm.n_facet_max);
+    return mc::marching_cubes(lower, upper, numx, numy, numz, access_3d_arr, isovalue, 
+            tm, vertices, polygons);
 }
 
 class MarchingCubeStaticSize
@@ -38,8 +42,13 @@ class MarchingCubeStaticSize
     public:
         TableManager tm;
         array<int, 3> shape;
+        ReservedVector<double> vertices;
+        ReservedVector<int> polygons;
+
         MarchingCubeStaticSize(const array<int, 3>& shape_) 
-            : tm(TableManager(shape_[0], shape_[1], shape_[2])), shape(shape_) {}
+            : tm(TableManager(shape_[0], shape_[1], shape_[2])), shape(shape_), 
+            vertices(ReservedVector<double>(tm.n_vert_max)),
+            polygons(ReservedVector<int>(tm.n_facet_max)) {} 
 
         tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > 
         compute(const py::EigenDRef<VectorXd> arr_flatten, double isovalue){
@@ -55,7 +64,10 @@ class MarchingCubeStaticSize
             };
 
             tm.reset();
-            return mc::marching_cubes(lower, upper, numx, numy, numz, access_3d_arr, isovalue, tm);
+            vertices.reset();
+            polygons.reset();
+            return mc::marching_cubes(lower, upper, numx, numy, numz, access_3d_arr, isovalue, 
+                    tm, vertices, polygons);
         }
 
 
