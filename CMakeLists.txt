@@ -11,8 +11,10 @@ set(LIBRARY_NAME mcube)
 pybind11_add_module(${LIBRARY_NAME} py_api.cpp marchingcubes.cpp)
 
 execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "import site; print(site.getsitepackages()[0], end='')"
+    COMMAND ${PYTHON_EXECUTABLE} -c 
+    "import site; import sys;sys.stdout.write(site.getsitepackages()[0])"
     OUTPUT_VARIABLE PYTHON_SITE_PACKAGES_INSTALL_DIR
     )
-message(${PYTHON_SITE_PACKAGES_INSTALL_DIR})
 install(TARGETS ${LIBRARY_NAME} DESTINATION ${PYTHON_SITE_PACKAGES_INSTALL_DIR})
+
+message("destination site-packages:" ${PYTHON_SITE_PACKAGES_INSTALL_DIR})
