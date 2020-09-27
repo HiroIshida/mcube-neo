@@ -45,7 +45,7 @@ struct TableManager
             }
         }
 
-        std::vector<std::vector<uint>> connected_components(std::vector<int> polygons){
+        std::vector<std::vector<uint>> connected_components(const std::vector<int>& polygons){
             int n_facet = polygons.size() / 3;
             std::vector<bool> isVisited(n_facet, false);
 
