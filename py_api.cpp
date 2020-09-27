@@ -28,7 +28,8 @@ marching_cubes(const py::EigenDRef<VectorXd> arr_flatten, const array<int, 3>& s
         return arr_flatten(idx);
     };
 
-    return mc::marching_cubes(lower, upper, numx, numy, numz, access_3d_arr, isovalue);
+    auto tm = TableManager(numx, numy, numz);
+    return mc::marching_cubes(lower, upper, numx, numy, numz, access_3d_arr, isovalue, tm);
 }
 
 

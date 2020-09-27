@@ -36,7 +36,7 @@ size_t mc_add_vertex(double x1, double y1, double z1, double c2,
 }
 
 template<typename vector3, typename formula>
-tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, int numz, formula f, double isovalue
+tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, int numz, formula f, double isovalue, TableManager& tm
     )
 {
 
@@ -54,7 +54,6 @@ tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const ve
         return;
         */
 
-    TableManager tm(numx, numy, numz);
 
     // numx, numy and numz are the numbers of evaluations in each direction
     --numx; --numy; --numz;
