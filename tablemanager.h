@@ -2,14 +2,38 @@
 #include <stack>
 #include <algorithm>    
 
+template <typename T>
+struct ReservedVector
+{
+    public:
+        std::vector<T> _data;
+        int counter;
+
+        ReservedVector(int n_reserve) :
+            _data(std::vector<T>(n_reserve)), counter(0) {}
+
+        void reset(){counter = 0;}
+
+        void push_back(T elem){_data[counter] = elem; counter++;}
+
+        T& operator[](int idx){return _data[idx];}
+
+        int size(){return counter;}
+        T* data(){return _data.data();}
+
+};
+
 struct TableManager
 {
     public:
         std::vector<std::vector<uint>> neighbor_table;
         std::vector<uint> neighbor_num_table;
+        int n_vert_max; // TODO remove this
+        int n_facet_max;// TODO remove this
         TableManager(int n1, int n2, int n3){
-            int n_vert_max = n1*n2*n3;
+            n_vert_max = n1*n2*n3;
             int n_neighbor_max = 8; // due to marching cube's property (don't proved yet, but emperically)
+            n_facet_max = n_vert_max * n_neighbor_max;
 
             std::vector<uint> neighbor_lst(n_neighbor_max, 0);
             neighbor_table = std::vector<std::vector<uint>>(n_vert_max, neighbor_lst);
@@ -45,7 +69,7 @@ struct TableManager
             }
         }
 
-        std::vector<std::vector<uint>> connected_components(std::vector<int> polygons){
+        std::vector<std::vector<uint>> connected_components(ReservedVector<int> polygons){
             int n_facet = polygons.size() / 3;
             std::vector<bool> isVisited(n_facet, false);
 
@@ -64,6 +88,7 @@ struct TableManager
                     Q.pop();
                     for(int i=0; i<3; i++){
                         uint vert_idx = polygons[3 * idx_here + i];
+                        //uint vert_idx_ = polygons_[3 * idx_here + i];
                         for(int j=0; j< neighbor_num_table[vert_idx]; j++){
                             uint near_facet_idx = neighbor_table[vert_idx][j];
                             if(!isVisited[near_facet_idx]){

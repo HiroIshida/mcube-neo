@@ -69,8 +69,7 @@ tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const ve
     auto _offset = [&](size_t i, size_t j, size_t k){return i*(numy+1)*(numz+1) + j*(numz+1) + k;};
 
     vector<double> vertices;
-    vector<int> polygons;
-    vector<vector<unsigned int>> neighbor_faces;
+    ReservedVector<int> polygons(tm.n_facet_max);
 
     for(int i=0; i<numx; ++i)
     {
@@ -238,7 +237,6 @@ tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const ve
     auto groups = tm.connected_components(polygons);
     MatrixXd V = Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(vertices.data(), vertices.size()/3, 3);
     MatrixXi P = Map<Matrix<int, Dynamic, Dynamic, RowMajor>>(polygons.data(), polygons.size()/3, 3);
-
 
     return std::make_tuple(V, P, groups);
 }
