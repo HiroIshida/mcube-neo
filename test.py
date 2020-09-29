@@ -16,8 +16,8 @@ def func(X):
 Z = func(pts)
 shape = [N]*3
 isovalue = 0.0
-V, F, C = mcube.marching_cube(Z, shape, isovalue)
-n_group = np.max(C) + 1
+V, F, Cv, Cf = mcube.marching_cube(Z, shape, isovalue)
+n_group = np.max(Cv) + 1
 
 import matplotlib.cm as cm
 cmap = cm.get_cmap(name='rainbow')
@@ -26,7 +26,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 colors = [cmap(25*i) for i in range(n_group)]
 for color, idx_color in zip(colors, range(n_group)):
-    idx_verts = np.array(C) == idx_color
+    idx_verts = np.array(Cv) == idx_color
     ax.scatter(V[idx_verts, 0], V[idx_verts, 1], V[idx_verts, 2], c=color)
 plt.tight_layout()
 plt.show()

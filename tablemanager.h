@@ -45,7 +45,7 @@ struct TableManager
             }
         }
 
-        std::vector<uint> connected_components(
+        std::array<std::vector<uint>, 2> connected_components(
                 const std::vector<double>& vertices,
                 const std::vector<int>& polygons){
             int n_facet = polygons.size() / 3;
@@ -96,6 +96,7 @@ struct TableManager
                 fill_facet_color(idx_start, color);
                 color++;
             }
-            return vertex_color_vector;
+            std::array<std::vector<uint>, 2> arr = {std::move(vertex_color_vector), std::move(facet_color_vector)};
+            return arr;
         }
 };

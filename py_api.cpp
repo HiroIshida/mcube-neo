@@ -12,7 +12,7 @@ namespace py = pybind11;
 using namespace std;
 using namespace Eigen;
 
-tuple<MatrixXd, MatrixXi, vector<uint>>
+tuple<MatrixXd, MatrixXi, vector<uint>, vector<uint>>
 marching_cubes(const py::EigenDRef<VectorXd> arr_flatten, const array<int, 3>& shape, double isovalue)
 {
     // here we use EigenDRef as it does not make a copy caues it's just a refernce 
@@ -41,7 +41,7 @@ class MarchingCubeStaticSize
         MarchingCubeStaticSize(const array<int, 3>& shape_) 
             : tm(TableManager(shape_[0], shape_[1], shape_[2])), shape(shape_) {}
 
-        tuple<MatrixXd, MatrixXi, vector<uint>>
+        tuple<MatrixXd, MatrixXi, vector<uint>, vector<uint>>
         compute(const py::EigenDRef<VectorXd> arr_flatten, double isovalue){
             array<int, 3> lower{0, 0, 0};
             array<int, 3> upper{shape[0]-1, shape[1]-1, shape[2]-1};
