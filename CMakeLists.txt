@@ -8,7 +8,7 @@ ADD_DEFINITIONS(-DEIGEN_NO_DEBUG)
 include_directories(${EIGEN3_INCLUDE_DIR})
 add_subdirectory(pybind11)
 set(LIBRARY_NAME mcube)
-pybind11_add_module(${LIBRARY_NAME} py_api.cpp marchingcubes.cpp)
+pybind11_add_module(${LIBRARY_NAME} py_api.cpp marchingcubes.cpp tablemanager.cpp)
 
 option(PYTHON_GLOBAL_SITE_PKG 
     "install into global site package. if OFF, or by default, will be installed into per-user site-packages" 

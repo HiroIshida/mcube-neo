@@ -36,7 +36,7 @@ size_t mc_add_vertex(double x1, double y1, double z1, double c2,
 }
 
 template<typename vector3, typename formula>
-tuple<MatrixXd, MatrixXi, vector<uint>, vector<uint>>
+tuple<MatrixXd, MatrixXi, vector<uint>, vector<uint>, vector<bool>>
 marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, int numz, formula f, double isovalue, TableManager& tm
     )
 {
@@ -236,14 +236,16 @@ marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, i
             }
         }
     }
-    auto arr = tm.connected_components(vertices, polygons);
-    auto& vertex_color_vector = arr[0];
-    auto& facet_color_vector = arr[1];
+    auto res_tuple = tm.connected_components(vertices, polygons);
+    //auto& vertex_color_vector = std::get<0>(res_tuple);
+    auto& vertex_color_vector = std::get<0>(res_tuple);
+    auto& facet_color_vector = std::get<1>(res_tuple);
+    auto& is_closed_vec = std::get<2>(res_tuple);
     MatrixXd V = Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(vertices.data(), vertices.size()/3, 3);
     MatrixXi P = Map<Matrix<int, Dynamic, Dynamic, RowMajor>>(polygons.data(), polygons.size()/3, 3);
 
 
-    return std::make_tuple(V, P, vertex_color_vector, facet_color_vector);
+    return std::make_tuple(V, P, vertex_color_vector, facet_color_vector, is_closed_vec);
 }
 
 }
