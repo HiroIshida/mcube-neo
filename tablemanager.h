@@ -1,6 +1,8 @@
 #include <vector>
 #include <stack>
 #include <algorithm>    
+#include <unordered_map>    
+#include "custom_hash.h"
 
 struct TableManager
 {
@@ -96,6 +98,43 @@ struct TableManager
                 fill_facet_color(idx_start, color);
                 color++;
             }
+
+            int n_group = color;
+            std::vector<std::unordered_map<std::pair<uint, uint>, uint>> edge_visit_count_map_vector(n_group);
+
+            for(int idx_facet=0; idx_facet<n_facet; idx_facet++){
+                auto idx_group = facet_color_vector[idx_facet];
+                auto& edge_visit_count_map = edge_visit_count_map_vector[idx_group];
+
+                auto a = polygons[idx_facet*3 + 0];
+                auto b = polygons[idx_facet*3 + 1];
+                auto c = polygons[idx_facet*3 + 2];
+
+                auto add_key = [&](int idx1, int idx2){
+                    std::pair<uint, uint> key;
+                    if(idx1 < idx2){
+                        key.first = idx1; key.second = idx2;
+                    }else{
+                        key.first = idx2; key.second = idx1;
+                    }
+                    edge_visit_count_map[key]++;
+                };
+                add_key(a, b);
+                add_key(b, c);
+                add_key(c, a);
+            }
+
+            std::vector<bool> isClosed(n_group, true);
+            for(int idx_group=0; idx_group<n_group; idx_group++){
+                auto& edge_visit_count_map = edge_visit_count_map_vector[idx_group];
+                for(auto& key_val : edge_visit_count_map){
+                    if(key_val.second != 2){
+                        isClosed[idx_group] = false;
+                        break;
+                    }
+                }
+            }
+
             std::array<std::vector<uint>, 2> arr = {std::move(vertex_color_vector), std::move(facet_color_vector)};
             return arr;
         }
