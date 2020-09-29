@@ -22,18 +22,4 @@ namespace std{
             return seed;
         }
     };
-
-    template<>
-    struct hash<Hoge>
-    {
-        inline size_t operator()(const Hoge& val) const
-        {
-            size_t seed = 0;
-            std::hash<int> int_hasher;
-            std::hash<std::string> str_hasher;
-            seed ^= int_hasher(val.aho) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-            seed ^= str_hasher(val.unko) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-            return seed;
-        }
-    };
 }
