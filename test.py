@@ -16,8 +16,9 @@ def func(X):
 Z = func(pts)
 shape = [N]*3
 isovalue = 0.0
-V, F, Cv, Cf = mcube.marching_cube(Z, shape, isovalue)
+V, F, Cv, Cf, isClosed = mcube.marching_cube(Z, shape, isovalue)
 n_group = np.max(Cv) + 1
+print(isClosed)
 
 import matplotlib.cm as cm
 cmap = cm.get_cmap(name='rainbow')

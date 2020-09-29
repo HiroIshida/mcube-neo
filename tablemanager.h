@@ -12,7 +12,9 @@ struct TableManager
         TableManager(int n1, int n2, int n3);
         void add_element(uint vert_idx, uint elem);
         void reset();
-        std::array<std::vector<uint>, 2> connected_components(
+
+        std::tuple<std::vector<uint>, std::vector<uint>, std::vector<bool>>
+        connected_components(
                 const std::vector<double>& vertices,
                 const std::vector<int>& polygons);
 };

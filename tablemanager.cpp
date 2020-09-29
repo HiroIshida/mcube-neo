@@ -28,7 +28,7 @@ void TableManager::reset()
     std::fill(neighbor_num_table.begin(), neighbor_num_table.end(), 0);
 }
 
-std::array<std::vector<uint>, 2> 
+std::tuple<std::vector<uint>, std::vector<uint>, std::vector<bool>>
 TableManager::connected_components(
         const std::vector<double>& vertices,
         const std::vector<int>& polygons){
@@ -83,8 +83,8 @@ TableManager::connected_components(
     int n_group = color;
     auto isclosed_vec = check_isclosed(vertices, polygons, facet_color_vector, n_group);
 
-    std::array<std::vector<uint>, 2> arr = {std::move(vertex_color_vector), std::move(facet_color_vector)};
-    return arr;
+    return std::make_tuple(
+            std::move(vertex_color_vector), std::move(facet_color_vector), std::move(isclosed_vec));
 }
 
 std::vector<bool> check_isclosed(
