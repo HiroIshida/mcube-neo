@@ -16,95 +16,17 @@ def func(X):
 Z = func(pts)
 shape = [N]*3
 isovalue = 0.0
-V, F, groups = mcube.marching_cube(Z, shape, isovalue)
-
-assert sum(map(len, groups)) == len(F), str(len(F)) + " and " + str(sum(map(len, groups)))
+V, F, C = mcube.marching_cube(Z, shape, isovalue)
+n_group = np.max(C) + 1
 
 import matplotlib.cm as cm
 cmap = cm.get_cmap(name='rainbow')
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-colors = [cmap(25*i) for i in range(len(groups))]
-for group, color in zip(groups, colors):
-    idx_verts = list(set(F[group].flatten()))
+colors = [cmap(25*i) for i in range(n_group)]
+for color, idx_color in zip(colors, range(n_group)):
+    idx_verts = list(set(F[np.array(C) == idx_color].flatten()))
     ax.scatter(V[idx_verts, 0], V[idx_verts, 1], V[idx_verts, 2], c=color)
 plt.tight_layout()
 plt.show()
-
-"""
-def dfs(E, N):
-    isVisited = np.array([False]*len(V))
-
-    def recursion(idx_here, isVisited, group):
-        isVisited[idx_here] = True
-        group.append(idx_here)
-
-        faces_near = N[idx_here]
-        for idx_face in faces_near:
-            face = E[idx_face]
-            for idx_vert in face:
-                if not isVisited[idx_vert]:
-                    recursion(idx_vert, isVisited, group)
-
-    def make_group(idx_init):
-        group = []
-        recursion(idx_init, isVisited, group)
-        return group
-
-    group_list = []
-    while(True):
-        pair = next(((x, idx) for (x, idx) in \
-                zip(list(isVisited), range(len(isVisited))) if ~x), None)
-        if pair is None:
-            break
-        group_list.append(make_group(pair[1]))
-
-    return isVisited, group_list
-
-def dfs_queue(E, N):
-    from queue import LifoQueue
-    isVisited = np.array([False]*len(V))
-
-    def make_group(idx_init):
-        group = []
-        q = LifoQueue()
-        isVisited[idx_init] = True
-        group.append(idx_init)
-        q.put(idx_init)
-        while not q.empty():
-            idx_here = q.get()
-            face_near_idxes = NF[idx_here]
-            for face_near_idx in face_near_idxes:
-                face = E[face_near_idx]
-                for idx_cand in face:
-                    if not isVisited[idx_cand]:
-                        isVisited[idx_cand] = True
-                        q.put(idx_cand)
-                        group.append(idx_cand)
-        return group
-
-    group_list = []
-    while(True):
-        pair = next(((x, idx) for (x, idx) in \
-                zip(list(isVisited), range(len(isVisited))) if ~x), None)
-        if pair is None:
-            break
-        group_list.append(make_group(pair[1]))
-
-    return isVisited, group_list
-
-isVisited, group_list = dfs_queue(E, NF)
-assert sum(map(len, group_list)) == len(V), str(len(V)) + " and " + str(sum(map(len, group_list)))
-
-import matplotlib.cm as cm
-cmap = cm.get_cmap(name='rainbow')
-
-
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-colors = [cmap(40*i) for i in range(len(group_list))]
-for group, color in zip(group_list, colors):
-    ax.scatter(V[group, 0], V[group, 1], V[group, 2], c=color)
-plt.show()
-"""

@@ -36,7 +36,8 @@ size_t mc_add_vertex(double x1, double y1, double z1, double c2,
 }
 
 template<typename vector3, typename formula>
-tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, int numz, formula f, double isovalue, TableManager& tm
+tuple<MatrixXd, MatrixXi, vector<uint>>
+marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, int numz, formula f, double isovalue, TableManager& tm
     )
 {
 
@@ -235,12 +236,12 @@ tuple<MatrixXd, MatrixXi, vector<vector<unsigned int>> > marching_cubes(const ve
             }
         }
     }
-    auto groups = tm.connected_components(polygons);
+    auto facet_color_vector = tm.connected_components(polygons);
     MatrixXd V = Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(vertices.data(), vertices.size()/3, 3);
     MatrixXi P = Map<Matrix<int, Dynamic, Dynamic, RowMajor>>(polygons.data(), polygons.size()/3, 3);
 
 
-    return std::make_tuple(V, P, groups);
+    return std::make_tuple(V, P, facet_color_vector);
 }
 
 }

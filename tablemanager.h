@@ -45,19 +45,18 @@ struct TableManager
             }
         }
 
-        std::vector<std::vector<uint>> connected_components(const std::vector<int>& polygons){
+        std::vector<uint> connected_components(const std::vector<int>& polygons){
             int n_facet = polygons.size() / 3;
             std::vector<bool> isVisited(n_facet, false);
+            std::vector<uint> facet_color_vector(n_facet);
 
-            auto make_group = [&](int idx_init){
-                std::vector<uint> group;
-                group.reserve(n_facet); // we know group will have n_vert elems at most
+            auto fill_facet_color = [&](int idx_init, int color){
                 std::stack<uint> Q;
 
                 // initialize
                 isVisited[idx_init] = true;
-                group.push_back(idx_init);
                 Q.push(idx_init);
+                facet_color_vector[idx_init] = color;
 
                 while(!Q.empty()){
                     auto idx_here = Q.top();
@@ -68,13 +67,12 @@ struct TableManager
                             uint near_facet_idx = neighbor_table[vert_idx][j];
                             if(!isVisited[near_facet_idx]){
                                 isVisited[near_facet_idx] = true;
-                                group.push_back(near_facet_idx);
                                 Q.push(near_facet_idx);
+                                facet_color_vector[near_facet_idx] = color;
                             }
                         }
                     }
                 }
-                return group;
             };
 
             auto first_false_idx = [&]() -> int{// return -1 if not found
@@ -85,12 +83,12 @@ struct TableManager
                 return -1;
             };
 
-            std::vector<std::vector<uint>> groups;
+            int color = 0;
             while(true){
                 auto idx_start = first_false_idx();
-                if(idx_start == -1){return groups;}
-                groups.push_back(make_group(idx_start));
+                if(idx_start == -1){return facet_color_vector;}
+                fill_facet_color(idx_start, color);
+                color++;
             }
-
         }
 };
