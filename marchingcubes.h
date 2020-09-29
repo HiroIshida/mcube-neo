@@ -236,7 +236,7 @@ marching_cubes(const vector3& lower, const vector3& upper, int numx, int numy, i
             }
         }
     }
-    auto facet_color_vector = tm.connected_components(polygons);
+    auto facet_color_vector = tm.connected_components(vertices, polygons);
     MatrixXd V = Map<Matrix<double, Dynamic, Dynamic, RowMajor>>(vertices.data(), vertices.size()/3, 3);
     MatrixXi P = Map<Matrix<int, Dynamic, Dynamic, RowMajor>>(polygons.data(), polygons.size()/3, 3);
 

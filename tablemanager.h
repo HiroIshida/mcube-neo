@@ -45,10 +45,15 @@ struct TableManager
             }
         }
 
-        std::vector<uint> connected_components(const std::vector<int>& polygons){
+        std::vector<uint> connected_components(
+                const std::vector<double>& vertices,
+                const std::vector<int>& polygons){
             int n_facet = polygons.size() / 3;
+            int n_vertex = vertices.size() / 3;
             std::vector<bool> isVisited(n_facet, false);
+
             std::vector<uint> facet_color_vector(n_facet);
+            std::vector<uint> vertex_color_vector(n_vertex, -1);
 
             auto fill_facet_color = [&](int idx_init, int color){
                 std::stack<uint> Q;
@@ -63,6 +68,7 @@ struct TableManager
                     Q.pop();
                     for(int i=0; i<3; i++){
                         uint vert_idx = polygons[3 * idx_here + i];
+                        vertex_color_vector[vert_idx] = color;
                         for(int j=0; j< neighbor_num_table[vert_idx]; j++){
                             uint near_facet_idx = neighbor_table[vert_idx][j];
                             if(!isVisited[near_facet_idx]){
@@ -86,9 +92,10 @@ struct TableManager
             int color = 0;
             while(true){
                 auto idx_start = first_false_idx();
-                if(idx_start == -1){return facet_color_vector;}
+                if(idx_start == -1){break;}
                 fill_facet_color(idx_start, color);
                 color++;
             }
+            return vertex_color_vector;
         }
 };

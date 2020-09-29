@@ -26,7 +26,7 @@ fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 colors = [cmap(25*i) for i in range(n_group)]
 for color, idx_color in zip(colors, range(n_group)):
-    idx_verts = list(set(F[np.array(C) == idx_color].flatten()))
+    idx_verts = np.array(C) == idx_color
     ax.scatter(V[idx_verts, 0], V[idx_verts, 1], V[idx_verts, 2], c=color)
 plt.tight_layout()
 plt.show()
