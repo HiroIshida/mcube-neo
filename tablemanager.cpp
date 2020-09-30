@@ -1,8 +1,5 @@
 #include "tablemanager.h"
-
-std::vector<bool> check_isclosed(
-        const std::vector<double>& vertices, const std::vector<int>& polygons, 
-        const std::vector<uint>& facet_color_vector, int n_group);
+#include<iostream>
 
 TableManager::TableManager(int n1, int n2, int n3)
 {
@@ -39,13 +36,35 @@ TableManager::connected_components(
     std::vector<uint> facet_color_vector(n_facet);
     std::vector<uint> vertex_color_vector(n_vertex, -1);
 
-    auto fill_facet_color = [&](int idx_init, int color){
+    auto store_edge = [&](int idx_facet, std::unordered_map<std::pair<uint, uint>, uint>& edge_visit_count){
+        auto a = polygons[idx_facet*3 + 0];
+        auto b = polygons[idx_facet*3 + 1];
+        auto c = polygons[idx_facet*3 + 2];
+
+        auto add_key = [&](int idx1, int idx2){
+            std::pair<uint, uint> key;
+            if(idx1 < idx2){
+                key.first = idx1; key.second = idx2;
+            }else{
+                key.first = idx2; key.second = idx1;
+            }
+            edge_visit_count[key]++;
+        };
+        add_key(a, b);
+        add_key(b, c);
+        add_key(c, a);
+    };
+
+    // iterate over facets using dfs
+    auto fill_facet_color = [&](int idx_init, int color)->bool{
         std::stack<uint> Q;
+        std::unordered_map<std::pair<uint, uint>, uint> edge_visit_count;
 
         // initialize
         isVisited[idx_init] = true;
         Q.push(idx_init);
         facet_color_vector[idx_init] = color;
+        store_edge(idx_init, edge_visit_count);
 
         while(!Q.empty()){
             auto idx_here = Q.top();
@@ -58,11 +77,22 @@ TableManager::connected_components(
                     if(!isVisited[near_facet_idx]){
                         isVisited[near_facet_idx] = true;
                         Q.push(near_facet_idx);
+                        store_edge(near_facet_idx, edge_visit_count);
                         facet_color_vector[near_facet_idx] = color;
                     }
                 }
             }
         }
+
+        // check isclosed
+        bool isclosed = true;
+        for(auto& key_val : edge_visit_count){
+            if(key_val.second != 2){
+                isclosed = false;
+                break;
+            }
+        }
+        return isclosed;
     };
 
     auto first_false_idx = [&]() -> int{// return -1 if not found
@@ -74,58 +104,13 @@ TableManager::connected_components(
     };
 
     int color = 0;
+    std::vector<bool> isclosed_vec;
     while(true){
         auto idx_start = first_false_idx();
         if(idx_start == -1){break;}
-        fill_facet_color(idx_start, color);
+        isclosed_vec.push_back(fill_facet_color(idx_start, color));
         color++;
     }
-    int n_group = color;
-    auto isclosed_vec = check_isclosed(vertices, polygons, facet_color_vector, n_group);
-
     return std::make_tuple(
             std::move(vertex_color_vector), std::move(facet_color_vector), std::move(isclosed_vec));
 }
-
-std::vector<bool> check_isclosed(
-        const std::vector<double>& vertices, const std::vector<int>& polygons, 
-        const std::vector<uint>& facet_color_vector, int n_group)
-{
-    int n_vertex = vertices.size()/3;
-    int n_facet = polygons.size()/3;
-    std::vector<std::unordered_map<std::pair<uint, uint>, uint>> edge_visit_count_map_vector(n_group);
-    for(int idx_facet=0; idx_facet<n_facet; idx_facet++){
-        auto idx_group = facet_color_vector[idx_facet];
-        auto& edge_visit_count_map = edge_visit_count_map_vector[idx_group];
-
-        auto a = polygons[idx_facet*3 + 0];
-        auto b = polygons[idx_facet*3 + 1];
-        auto c = polygons[idx_facet*3 + 2];
-
-        auto add_key = [&](int idx1, int idx2){
-            std::pair<uint, uint> key;
-            if(idx1 < idx2){
-                key.first = idx1; key.second = idx2;
-            }else{
-                key.first = idx2; key.second = idx1;
-            }
-            edge_visit_count_map[key]++;
-        };
-        add_key(a, b);
-        add_key(b, c);
-        add_key(c, a);
-    }
-
-    std::vector<bool> isClosed(n_group, true);
-    for(int idx_group=0; idx_group<n_group; idx_group++){
-        auto& edge_visit_count_map = edge_visit_count_map_vector[idx_group];
-        for(auto& key_val : edge_visit_count_map){
-            if(key_val.second != 2){
-                isClosed[idx_group] = false;
-                break;
-            }
-        }
-    }
-    return isClosed;
-}
-
